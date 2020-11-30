@@ -35,7 +35,8 @@ public class AudioPlayer {
     }
 
     private static String source;
-    private static boolean playNext;
+    private static boolean playNext = false;
+    private static int duration = -1;
     private OnPreparedListener onPreparedListener;
     private OnLoadListener onLoadListener;
     private OnPauseResumeListener onPauseResumeListener;
@@ -108,6 +109,7 @@ public class AudioPlayer {
 
     public void stop() {
         timeInfoBean = null;
+        duration = -1;
         new Thread(() -> n_stop()).start();
     }
 
@@ -119,6 +121,13 @@ public class AudioPlayer {
         source = url;
         playNext = true;
         stop();
+    }
+
+    public int getDuration() {
+        if(duration < 0) {
+            duration = n_duration();
+        }
+        return duration;
     }
 
     /**
@@ -174,5 +183,6 @@ public class AudioPlayer {
     private native void n_resume();
     private native void n_stop();
     private native void n_seek(int secds);
+    private native int n_duration();
 
 }

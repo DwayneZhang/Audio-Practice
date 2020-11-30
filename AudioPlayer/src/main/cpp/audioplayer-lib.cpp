@@ -112,3 +112,13 @@ Java_com_dwayne_com_audioplayer_player_AudioPlayer_n_1seek(JNIEnv *env, jobject 
         ffmpeg->seek(secds);
     }
 }
+
+extern "C"
+JNIEXPORT jint JNICALL
+Java_com_dwayne_com_audioplayer_player_AudioPlayer_n_1duration(JNIEnv *env,
+                                                               jobject thiz) {
+    if(ffmpeg != NULL) {
+        return ffmpeg->duration;
+    }
+    return 0;
+}

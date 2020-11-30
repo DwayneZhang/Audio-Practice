@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.view.View;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -18,29 +19,70 @@ public class MainActivity extends AppCompatActivity {
 
     private AudioPlayer audioPlayer;
     private TextView tvTime;
+    private SeekBar seekBarSeek;
+    private int position = 0;
+    private boolean isSeekBar = false;
+    Handler handler = new Handler() {
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            super.handleMessage(msg);
+            if(msg.what == 1) {
+                if(!isSeekBar) {
+                    TimeInfoBean timeInfoBean = (TimeInfoBean) msg.obj;
+                    tvTime.setText(String.format("%s/%s",
+                            TimeUtil.secdsToDateFormat(timeInfoBean.getCurrentTime()),
+                            TimeUtil.secdsToDateFormat(timeInfoBean.getTotalTime())));
+                    seekBarSeek.setProgress(timeInfoBean.getCurrentTime() * 100 / timeInfoBean.getTotalTime());
+                }
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         tvTime = findViewById(R.id.tv_time);
+        seekBarSeek = findViewById(R.id.seekbar_seek);
         audioPlayer = new AudioPlayer();
         audioPlayer.setOnPreparedListener(() -> {
             LogUtil.d("open success");
             audioPlayer.start();
         });
         audioPlayer.setOnLoadListener(load -> LogUtil.d(load ? "loading" : "playing"));
-        audioPlayer.setOnPauseResumeListener(pause -> LogUtil.d(pause ? "pause" : "resume"));
+        audioPlayer.setOnPauseResumeListener(pause -> LogUtil.d(pause ? "pause" :
+                "resume"));
         audioPlayer.setOnTimeInfoListener(timeInfoBean -> {
             Message message = Message.obtain();
             message.what = 1;
             message.obj = timeInfoBean;
             handler.sendMessage(message);
         });
-        audioPlayer.setOnErrorListener((code, msg)-> LogUtil.e(String.format("error code:%d, msg:%s", code, msg)));
-        audioPlayer.setOnCompleteListener(()->LogUtil.d("play complete"));
-    }
+        audioPlayer.setOnErrorListener((code, msg) -> LogUtil.e(String.format("error " +
+                "code:%d, msg:%s", code, msg)));
+        audioPlayer.setOnCompleteListener(() -> LogUtil.d("play complete"));
 
+        seekBarSeek.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress,
+                                          boolean fromUser) {
+                if(audioPlayer.getDuration() > 0 && isSeekBar) {
+                    position = audioPlayer.getDuration() * progress / 100;
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                isSeekBar = true;
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                audioPlayer.seek(position);
+                isSeekBar = false;
+            }
+        });
+    }
 
     public void begin(View view) {
 //        audioPlayer.setSource("/storage/emulated/0/Download/dcjlxk.mp3");
@@ -57,19 +99,6 @@ public class MainActivity extends AppCompatActivity {
     public void resume(View view) {
         audioPlayer.resume();
     }
-
-    Handler handler = new Handler() {
-        @Override
-        public void handleMessage(@NonNull Message msg) {
-            super.handleMessage(msg);
-            if(msg.what == 1) {
-                TimeInfoBean timeInfoBean = (TimeInfoBean) msg.obj;
-                tvTime.setText(String.format("%s/%s",
-                        TimeUtil.secdsToDateFormat(timeInfoBean.getCurrentTime()),
-                        TimeUtil.secdsToDateFormat(timeInfoBean.getTotalTime())));
-            }
-        }
-    };
 
     public void stop(View view) {
         audioPlayer.stop();
