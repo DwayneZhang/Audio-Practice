@@ -264,3 +264,10 @@ void FFmpeg::setVolume(int percent) {
         audio->setVolume(percent);
     }
 }
+
+void FFmpeg::setMute(int mute) {
+
+    if (audio != NULL) {
+        audio->setMute(mute);
+    }
+}

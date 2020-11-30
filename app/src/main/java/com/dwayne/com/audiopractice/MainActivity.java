@@ -10,6 +10,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.dwayne.com.audioplayer.MuteEnum;
 import com.dwayne.com.audioplayer.TimeInfoBean;
 import com.dwayne.com.audioplayer.log.LogUtil;
 import com.dwayne.com.audioplayer.player.AudioPlayer;
@@ -48,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
         seekBarVolume = findViewById(R.id.seekbar_volume);
         audioPlayer = new AudioPlayer();
         audioPlayer.setVolume(50);
+        audioPlayer.setMute(MuteEnum.MUTE_CENTER);
         seekBarVolume.setProgress(audioPlayer.getVolumePercent());
         audioPlayer.setOnPreparedListener(() -> {
             LogUtil.d("open success");
@@ -133,5 +135,17 @@ public class MainActivity extends AppCompatActivity {
 
     public void next(View view) {
         audioPlayer.playNext("/storage/emulated/0/Download/dcjlxk.mp3");
+    }
+
+    public void left(View view) {
+        audioPlayer.setMute(MuteEnum.MUTE_LEFT);
+    }
+
+    public void right(View view) {
+        audioPlayer.setMute(MuteEnum.MUTE_RIGHT);
+    }
+
+    public void center(View view) {
+        audioPlayer.setMute(MuteEnum.MUTE_CENTER);
     }
 }

@@ -2,6 +2,7 @@ package com.dwayne.com.audioplayer.player;
 
 import android.text.TextUtils;
 
+import com.dwayne.com.audioplayer.MuteEnum;
 import com.dwayne.com.audioplayer.TimeInfoBean;
 import com.dwayne.com.audioplayer.listener.OnCompleteListener;
 import com.dwayne.com.audioplayer.listener.OnErrorListener;
@@ -38,6 +39,7 @@ public class AudioPlayer {
     private static boolean playNext = false;
     private static int duration = -1;
     private static int volumePercent = 100;
+    private static MuteEnum muteEnum = MuteEnum.MUTE_CENTER;
     private OnPreparedListener onPreparedListener;
     private OnLoadListener onLoadListener;
     private OnPauseResumeListener onPauseResumeListener;
@@ -81,6 +83,11 @@ public class AudioPlayer {
         return volumePercent;
     }
 
+    public void setMute(MuteEnum mute) {
+        muteEnum = mute;
+        n_mute(mute.getValue());
+    }
+
     public void prepare() {
         if(TextUtils.isEmpty(source)) {
             LogUtil.d("source not be empty!");
@@ -97,6 +104,7 @@ public class AudioPlayer {
 
         new Thread(() -> {
             setVolume(volumePercent);
+            setMute(muteEnum);
             n_start();
         }).start();
     }
@@ -200,5 +208,6 @@ public class AudioPlayer {
     private native void n_seek(int secds);
     private native int n_duration();
     private native void n_volume(int percent);
+    private native void n_mute(int mute);
 
 }

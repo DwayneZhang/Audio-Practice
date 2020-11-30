@@ -131,3 +131,12 @@ Java_com_dwayne_com_audioplayer_player_AudioPlayer_n_1volume(JNIEnv *env, jobjec
         ffmpeg->setVolume(percent);
     }
 }
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_dwayne_com_audioplayer_player_AudioPlayer_n_1mute(JNIEnv *env, jobject thiz,
+                                                           jint mute) {
+    if(ffmpeg != NULL) {
+        ffmpeg->setMute(mute);
+    }
+}
