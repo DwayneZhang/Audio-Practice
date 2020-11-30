@@ -142,9 +142,10 @@ void pcmBufferCallBack(SLAndroidSimpleBufferQueueItf bf, void *context) {
         int buffersize = audio->resampleAudio();
         if (buffersize > 0) {
             audio->clock += buffersize / (double) (audio->sample_rate * 2 * 2);
-            if(audio->clock - audio->last_time >= 0.1) {
+            if (audio->clock - audio->last_time >= 0.1) {
                 audio->last_time = audio->clock;
-                audio->callJava->onCallTimeInfo(CHILD_THREAD, audio->clock, audio->duration);
+                audio->callJava->onCallTimeInfo(CHILD_THREAD, audio->clock,
+                                                audio->duration);
             }
             (*audio->pcmBufferQueue)->Enqueue(audio->pcmBufferQueue,
                                               (char *) audio->buffer,
@@ -195,8 +196,8 @@ void Audio::initOpenSLES() {
     SLDataSource slDataSource = {&android_queue, &pcm};
 
 
-    const SLInterfaceID ids[1] = {SL_IID_BUFFERQUEUE};
-    const SLboolean req[1] = {SL_BOOLEAN_TRUE};
+    const SLInterfaceID ids[2] = {SL_IID_BUFFERQUEUE, SL_IID_VOLUME};
+    const SLboolean req[2] = {SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE};
 
     (*engineEngine)->CreateAudioPlayer(engineEngine, &pcmPlayerObject, &slDataSource,
                                        &audioSnk, 1, ids, req);
@@ -205,6 +206,9 @@ void Audio::initOpenSLES() {
 
     //得到接口后调用  获取Player接口
     (*pcmPlayerObject)->GetInterface(pcmPlayerObject, SL_IID_PLAY, &pcmPlayerPlay);
+    //获取Volume接口
+    (*pcmPlayerObject)->GetInterface(pcmPlayerObject, SL_IID_VOLUME, &pcmVolumePlay);
+    setVolume(volumePercent);
 
     //注册回调缓冲区 获取缓冲队列接口
     (*pcmPlayerObject)->GetInterface(pcmPlayerObject, SL_IID_BUFFERQUEUE,
@@ -289,7 +293,7 @@ void Audio::release() {
         queue = NULL;
     }
 
-    if(pcmPlayerObject != NULL) {
+    if (pcmPlayerObject != NULL) {
         (*pcmPlayerObject)->Destroy(pcmPlayerObject);
         pcmPlayerObject = NULL;
         pcmPlayerPlay = NULL;
@@ -302,13 +306,13 @@ void Audio::release() {
         outputMixEnvironmentalReverb = NULL;
     }
 
-    if(engineObject != NULL) {
+    if (engineObject != NULL) {
         (*engineObject)->Destroy(engineObject);
         engineObject = NULL;
         engineEngine = NULL;
     }
 
-    if(buffer != NULL) {
+    if (buffer != NULL) {
         free(buffer);
         buffer = NULL;
     }
@@ -319,11 +323,36 @@ void Audio::release() {
         avCodecContext = NULL;
     }
 
-    if(playStatus != NULL) {
+    if (playStatus != NULL) {
         playStatus = NULL;
     }
 
-    if(callJava != NULL) {
+    if (callJava != NULL) {
         callJava = NULL;
+    }
+}
+
+void Audio::setVolume(int percent) {
+    volumePercent = percent;
+    if (pcmVolumePlay != NULL) {
+        if (percent > 30) {
+            (*pcmVolumePlay)->SetVolumeLevel(pcmVolumePlay, (100 - percent) * -20);
+        } else if (percent > 25) {
+            (*pcmVolumePlay)->SetVolumeLevel(pcmVolumePlay, (100 - percent) * -22);
+        } else if (percent > 20) {
+            (*pcmVolumePlay)->SetVolumeLevel(pcmVolumePlay, (100 - percent) * -25);
+        } else if (percent > 15) {
+            (*pcmVolumePlay)->SetVolumeLevel(pcmVolumePlay, (100 - percent) * -28);
+        } else if (percent > 10) {
+            (*pcmVolumePlay)->SetVolumeLevel(pcmVolumePlay, (100 - percent) * -30);
+        } else if (percent > 5) {
+            (*pcmVolumePlay)->SetVolumeLevel(pcmVolumePlay, (100 - percent) * -34);
+        } else if (percent > 3) {
+            (*pcmVolumePlay)->SetVolumeLevel(pcmVolumePlay, (100 - percent) * -37);
+        } else if (percent > 0) {
+            (*pcmVolumePlay)->SetVolumeLevel(pcmVolumePlay, (100 - percent) * -40);
+        } else {
+            (*pcmVolumePlay)->SetVolumeLevel(pcmVolumePlay, (100 - percent) * -100);
+        }
     }
 }

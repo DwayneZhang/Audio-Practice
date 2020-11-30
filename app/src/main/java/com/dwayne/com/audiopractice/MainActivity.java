@@ -18,8 +18,8 @@ import com.dwayne.com.audioplayer.util.TimeUtil;
 public class MainActivity extends AppCompatActivity {
 
     private AudioPlayer audioPlayer;
-    private TextView tvTime;
-    private SeekBar seekBarSeek;
+    private TextView tvTime, tvVolume;
+    private SeekBar seekBarSeek, seekBarVolume;
     private int position = 0;
     private boolean isSeekBar = false;
     Handler handler = new Handler() {
@@ -43,8 +43,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         tvTime = findViewById(R.id.tv_time);
+        tvVolume = findViewById(R.id.tv_volume);
         seekBarSeek = findViewById(R.id.seekbar_seek);
+        seekBarVolume = findViewById(R.id.seekbar_volume);
         audioPlayer = new AudioPlayer();
+        audioPlayer.setVolume(50);
+        seekBarVolume.setProgress(audioPlayer.getVolumePercent());
         audioPlayer.setOnPreparedListener(() -> {
             LogUtil.d("open success");
             audioPlayer.start();
@@ -80,6 +84,25 @@ public class MainActivity extends AppCompatActivity {
             public void onStopTrackingTouch(SeekBar seekBar) {
                 audioPlayer.seek(position);
                 isSeekBar = false;
+            }
+        });
+
+        seekBarVolume.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress,
+                                          boolean fromUser) {
+                audioPlayer.setVolume(progress);
+                tvVolume.setText(String.format("音量：%d", audioPlayer.getVolumePercent()));
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
             }
         });
     }

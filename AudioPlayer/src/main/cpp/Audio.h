@@ -37,9 +37,10 @@ public:
 
     int duration = 0;
     AVRational time_base;
-    double now_time  = 0;
-    double clock = 0;
+    double now_time  = 0;//当然帧时间
+    double clock = 0;//总播放时长
     double last_time = 0;
+    int volumePercent = 100;
 
     // 引擎接口
     SLObjectItf engineObject = NULL;
@@ -53,6 +54,7 @@ public:
     //pcm
     SLObjectItf pcmPlayerObject = NULL;
     SLPlayItf pcmPlayerPlay = NULL;
+    SLVolumeItf pcmVolumePlay = NULL;
 
     //缓冲器队列接口
     SLAndroidSimpleBufferQueueItf pcmBufferQueue = NULL;
@@ -76,6 +78,8 @@ public:
     void stop();
 
     void release();
+
+    void setVolume(int percent);
 };
 
 

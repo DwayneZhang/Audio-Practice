@@ -257,3 +257,10 @@ void FFmpeg::seek(int64_t secds) {
         }
     }
 }
+
+void FFmpeg::setVolume(int percent) {
+
+    if (audio != NULL) {
+        audio->setVolume(percent);
+    }
+}

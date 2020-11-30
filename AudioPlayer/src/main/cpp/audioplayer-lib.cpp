@@ -122,3 +122,12 @@ Java_com_dwayne_com_audioplayer_player_AudioPlayer_n_1duration(JNIEnv *env,
     }
     return 0;
 }
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_dwayne_com_audioplayer_player_AudioPlayer_n_1volume(JNIEnv *env, jobject thiz,
+                                                             jint percent) {
+    if(ffmpeg != NULL) {
+        ffmpeg->setVolume(percent);
+    }
+}

@@ -37,6 +37,7 @@ public class AudioPlayer {
     private static String source;
     private static boolean playNext = false;
     private static int duration = -1;
+    private static int volumePercent = 100;
     private OnPreparedListener onPreparedListener;
     private OnLoadListener onLoadListener;
     private OnPauseResumeListener onPauseResumeListener;
@@ -76,6 +77,10 @@ public class AudioPlayer {
         this.onCompleteListener = onCompleteListener;
     }
 
+    public int getVolumePercent() {
+        return volumePercent;
+    }
+
     public void prepare() {
         if(TextUtils.isEmpty(source)) {
             LogUtil.d("source not be empty!");
@@ -90,7 +95,10 @@ public class AudioPlayer {
             return;
         }
 
-        new Thread(() -> n_start()).start();
+        new Thread(() -> {
+            setVolume(volumePercent);
+            n_start();
+        }).start();
     }
 
     public void pause() {
@@ -156,6 +164,13 @@ public class AudioPlayer {
         }
     }
 
+    public void setVolume(int percent) {
+        if(percent >= 0 && percent <= 100) {
+            volumePercent = percent;
+            n_volume(percent);
+        }
+    }
+
     public void onCallError(int code, String msg) {
         stop();
         if(onErrorListener != null) {
@@ -184,5 +199,6 @@ public class AudioPlayer {
     private native void n_stop();
     private native void n_seek(int secds);
     private native int n_duration();
+    private native void n_volume(int percent);
 
 }
