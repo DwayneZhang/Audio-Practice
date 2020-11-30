@@ -5,6 +5,8 @@ cmake_minimum_required(VERSION 3.10.2)
 
 project("ffmpegpractice")
 include_directories(src/main/cpp/include)
+include_directories(src/main/cpp/soundtouch/include)
+include_directories(src/main/cpp/soundtouch/SoundTouch)
 
 add_library(audioplayer-lib SHARED
         src/main/cpp/audioplayer-lib.cpp
@@ -12,7 +14,19 @@ add_library(audioplayer-lib SHARED
         src/main/cpp/FFmpeg.cpp
         src/main/cpp/Audio.cpp
         src/main/cpp/PlayStatus.cpp
-        src/main/cpp/Queue.cpp)
+        src/main/cpp/Queue.cpp
+        src/main/cpp/soundtouch/SoundTouch/AAFilter.cpp
+        src/main/cpp/soundtouch/SoundTouch/FIFOSampleBuffer.cpp
+        src/main/cpp/soundtouch/SoundTouch/FIRFilter.cpp
+        src/main/cpp/soundtouch/SoundTouch/cpu_detect_x86.cpp
+        src/main/cpp/soundtouch/SoundTouch/sse_optimized.cpp
+        src/main/cpp/soundtouch/SoundTouch/RateTransposer.cpp
+        src/main/cpp/soundtouch/SoundTouch/SoundTouch.cpp
+        src/main/cpp/soundtouch/SoundTouch/InterpolateCubic.cpp
+        src/main/cpp/soundtouch/SoundTouch/InterpolateLinear.cpp
+        src/main/cpp/soundtouch/SoundTouch/InterpolateShannon.cpp
+        src/main/cpp/soundtouch/SoundTouch/TDStretch.cpp
+        src/main/cpp/soundtouch/SoundTouch/PeakFinder.cpp)
 
 add_library( avcodec-57
         SHARED

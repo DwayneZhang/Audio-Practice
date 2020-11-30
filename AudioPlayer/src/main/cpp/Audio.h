@@ -11,7 +11,7 @@
 #include "CallJava.h"
 #include <SLES/OpenSLES.h>
 #include <SLES/OpenSLES_Android.h>
-
+#include "SoundTouch.h"
 extern "C" {
 #include "libavcodec/avcodec.h"
 #include "libswresample/swresample.h"
