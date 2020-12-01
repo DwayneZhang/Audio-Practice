@@ -78,7 +78,7 @@ void CallJava::onCallTimeInfo(int threadType, int curr, int total) {
     }
 }
 
-void CallJava::onCallError(int threadType, int code, char *msg) {
+void CallJava::onCallError(int threadType, int code, const char *msg) {
     if (threadType == MAIN_THREAD) {
         jstring jmsg = jniEnv->NewStringUTF(msg);
         jniEnv->CallVoidMethod(jobj, jmid_error, code, jmsg);

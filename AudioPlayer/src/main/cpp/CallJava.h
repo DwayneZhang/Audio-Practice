@@ -38,7 +38,7 @@ public:
 
     void onCallTimeInfo(int threadType, int curr, int total);
 
-    void onCallError(int threadType, int code, char *msg);
+    void onCallError(int threadType, int code, const char *msg);
 
     void onCallComplete(int threadType);
 

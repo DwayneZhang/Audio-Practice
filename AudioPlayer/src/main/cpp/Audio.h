@@ -11,7 +11,6 @@
 #include "CallJava.h"
 #include <SLES/OpenSLES.h>
 #include <SLES/OpenSLES_Android.h>
-#include <libavutil/time.h>
 #include "SoundTouch.h"
 
 using namespace soundtouch;
@@ -19,6 +18,7 @@ using namespace soundtouch;
 extern "C" {
 #include "libavcodec/avcodec.h"
 #include "libswresample/swresample.h"
+#include "libavutil/time.h"
 }
 
 class Audio {
@@ -50,6 +50,7 @@ public:
     float speed = 1.0f;
 
     bool isRecordPCM = false;
+    bool readFrameFinished = true;
 
     // 引擎接口
     SLObjectItf engineObject = NULL;
