@@ -171,7 +171,7 @@ int Audio::getSoundTouchData() {
             finished = true;
             continue;
         } else {
-            if (out_buffer = NULL) {
+            if (out_buffer == NULL) {
                 num = soundTouch->receiveSamples(sampleBuffer, data_size / 4);
                 if (num == 0) {
                     finished = true;
