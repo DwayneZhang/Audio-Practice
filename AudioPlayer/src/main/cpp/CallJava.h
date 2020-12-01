@@ -25,6 +25,7 @@ public:
     jmethodID  jmid_timeinfo;
     jmethodID  jmid_error;
     jmethodID  jmid_complete;
+    jmethodID  jmid_volumedb;
 
 public:
     CallJava(JavaVM *vm, JNIEnv *env, jobject *obj);
@@ -39,6 +40,8 @@ public:
     void onCallError(int threadType, int code, char *msg);
 
     void onCallComplete(int threadType);
+
+    void onCallVolumeDB(int threadType, int db);
 
 };
 

@@ -68,6 +68,8 @@ public class MainActivity extends AppCompatActivity {
                 "code:%d, msg:%s", code, msg)));
         audioPlayer.setOnCompleteListener(() -> LogUtil.d("play complete"));
 
+        audioPlayer.setOnVolumeDBListener(db -> LogUtil.d(String.format("db is %d", db)));
+
         seekBarSeek.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress,

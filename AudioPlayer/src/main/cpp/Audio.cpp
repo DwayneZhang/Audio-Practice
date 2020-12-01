@@ -152,7 +152,7 @@ int Audio::getSoundTouchData() {
             data_size = resampleAudio((void **) &out_buffer);
             if (data_size > 0) {
                 for (int i = 0; i < data_size / 2 + 1;
-                i++) {
+                     i++) {
                     sampleBuffer[i] = (out_buffer[i * 2] |
                                        ((out_buffer[i * 2 + 1])) << 8);
                 }
@@ -191,9 +191,12 @@ void pcmBufferCallBack(SLAndroidSimpleBufferQueueItf bf, void *context) {
                 audio->callJava->onCallTimeInfo(CHILD_THREAD, audio->clock,
                                                 audio->duration);
             }
+            audio->callJava->onCallVolumeDB(
+                    CHILD_THREAD,
+                    audio->getPCMDB((char *) (audio->sampleBuffer), buffersize *4));
             (*audio->pcmBufferQueue)->Enqueue(audio->pcmBufferQueue,
                                               (char *) audio->sampleBuffer,
-                                              buffersize * 2 *2);
+                                              buffersize * 2 * 2);
         }
     }
 }
@@ -434,4 +437,19 @@ void Audio::setSpeed(float speed) {
     if (soundTouch != NULL) {
         soundTouch->setTempo(speed);
     }
+}
+
+int Audio::getPCMDB(char *pcmadata, size_t pcmsize) {
+    int db = 0;
+    short int pervalue = 0;
+    double sum = 0;
+    for (int i = 0; i < pcmsize; i += 2) {
+        memcpy(&pervalue, pcmadata + i, 2);
+        sum += abs(pervalue);
+    }
+    sum = sum / (pcmsize / 2);
+    if (sum > 0) {
+        db = (int) 20 * log10(sum);
+    }
+    return db;
 }

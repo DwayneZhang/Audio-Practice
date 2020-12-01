@@ -10,6 +10,7 @@ import com.dwayne.com.audioplayer.listener.OnLoadListener;
 import com.dwayne.com.audioplayer.listener.OnPauseResumeListener;
 import com.dwayne.com.audioplayer.listener.OnPreparedListener;
 import com.dwayne.com.audioplayer.listener.OnTimeInfoListener;
+import com.dwayne.com.audioplayer.listener.OnVolumeDBListener;
 import com.dwayne.com.audioplayer.log.LogUtil;
 
 /**
@@ -48,6 +49,7 @@ public class AudioPlayer {
     private OnTimeInfoListener onTimeInfoListener;
     private OnErrorListener onErrorListener;
     private OnCompleteListener onCompleteListener;
+    private OnVolumeDBListener onVolumeDBListener;
     private static TimeInfoBean timeInfoBean;
 
     public AudioPlayer() {
@@ -79,6 +81,10 @@ public class AudioPlayer {
 
     public void setOnCompleteListener(OnCompleteListener onCompleteListener) {
         this.onCompleteListener = onCompleteListener;
+    }
+
+    public void setOnVolumeDBListener(OnVolumeDBListener onVolumeDBListener) {
+        this.onVolumeDBListener = onVolumeDBListener;
     }
 
     public int getVolumePercent() {
@@ -211,6 +217,12 @@ public class AudioPlayer {
         if(playNext) {
             playNext = false;
             prepare();
+        }
+    }
+
+    public void onCallVolumeDB(int db) {
+        if(onVolumeDBListener != null) {
+            onVolumeDBListener.onDBValue(db);
         }
     }
 
