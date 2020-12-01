@@ -191,6 +191,10 @@ void pcmBufferCallBack(SLAndroidSimpleBufferQueueItf bf, void *context) {
                 audio->callJava->onCallTimeInfo(CHILD_THREAD, audio->clock,
                                                 audio->duration);
             }
+
+//            audio->callJava->onCallPCMToAAC(CHILD_THREAD, buffersize * 2 * 2,
+//                                            audio->sampleBuffer);
+
             audio->callJava->onCallVolumeDB(
                     CHILD_THREAD,
                     audio->getPCMDB((char *) (audio->sampleBuffer), buffersize *4));

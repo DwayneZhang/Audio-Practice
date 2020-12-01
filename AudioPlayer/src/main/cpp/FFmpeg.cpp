@@ -287,3 +287,10 @@ void FFmpeg::setSpeed(float speed) {
         audio->setSpeed(speed);
     }
 }
+
+int FFmpeg::getSamplerate() {
+    if (audio != NULL) {
+        return audio->avCodecContext->sample_rate;
+    }
+    return 0;
+}

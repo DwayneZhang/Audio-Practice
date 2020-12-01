@@ -16,6 +16,8 @@ import com.dwayne.com.audioplayer.log.LogUtil;
 import com.dwayne.com.audioplayer.player.AudioPlayer;
 import com.dwayne.com.audioplayer.util.TimeUtil;
 
+import java.io.File;
+
 public class MainActivity extends AppCompatActivity {
 
     private AudioPlayer audioPlayer;
@@ -68,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
                 "code:%d, msg:%s", code, msg)));
         audioPlayer.setOnCompleteListener(() -> LogUtil.d("play complete"));
 
-        audioPlayer.setOnVolumeDBListener(db -> LogUtil.d(String.format("db is %d", db)));
+//        audioPlayer.setOnVolumeDBListener(db -> LogUtil.d(String.format("db is %d", db)));
 
         seekBarSeek.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -162,5 +164,9 @@ public class MainActivity extends AppCompatActivity {
     public void normal(View view) {
         audioPlayer.setSpeed(1.0f);
         audioPlayer.setPitch(1.0f);
+    }
+
+    public void record(View view) {
+//        audioPlayer.stardRecord(new File("/sdcard/Download/player.aac"));
     }
 }

@@ -158,3 +158,13 @@ Java_com_dwayne_com_audioplayer_player_AudioPlayer_n_1speed(JNIEnv *env, jobject
         ffmpeg->setSpeed(speed);
     }
 }
+
+extern "C"
+JNIEXPORT jint JNICALL
+Java_com_dwayne_com_audioplayer_player_AudioPlayer_n_1samplerate(JNIEnv *env,
+                                                                 jobject thiz) {
+    if (ffmpeg != NULL) {
+        return ffmpeg->getSamplerate();
+    }
+    return 0;
+}

@@ -26,6 +26,7 @@ public:
     jmethodID  jmid_error;
     jmethodID  jmid_complete;
     jmethodID  jmid_volumedb;
+    jmethodID  jmid_pcmtoaac;
 
 public:
     CallJava(JavaVM *vm, JNIEnv *env, jobject *obj);
@@ -42,6 +43,8 @@ public:
     void onCallComplete(int threadType);
 
     void onCallVolumeDB(int threadType, int db);
+
+    void onCallPCMToAAC(int threadType, int size, void *buffer);
 
 };
 
