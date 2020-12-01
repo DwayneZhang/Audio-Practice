@@ -34,8 +34,13 @@ void Audio::play() {
 }
 
 int Audio::resampleAudio(void **pcmbuf) {
-
+    data_size = 0;
     while (playStatus != NULL && !playStatus->exit) {
+
+        if (playStatus->seek) {
+            continue;
+        }
+
         if (queue->getQueueSize() == 0) {
             if (!playStatus->load) {
                 playStatus->load = true;
@@ -66,7 +71,7 @@ int Audio::resampleAudio(void **pcmbuf) {
         avFrame = av_frame_alloc();
         ret = avcodec_receive_frame(avCodecContext, avFrame);
         if (ret == 0) {
-            if (avFrame->channels > 0 && avFrame->channel_layout == 0) {
+            if (avFrame->channels && avFrame->channel_layout == 0) {
                 avFrame->channel_layout = av_get_default_channel_layout(
                         avFrame->channels);
             } else if (avFrame->channels == 0 && avFrame->channel_layout > 0) {
@@ -154,7 +159,7 @@ int Audio::getSoundTouchData() {
                 for (int i = 0; i < data_size / 2 + 1;
                      i++) {
                     sampleBuffer[i] = (out_buffer[i * 2] |
-                                       ((out_buffer[i * 2 + 1])) << 8);
+                                       ((out_buffer[i * 2 + 1]) << 8));
                 }
                 soundTouch->putSamples(sampleBuffer, nb);
                 num = soundTouch->receiveSamples(sampleBuffer, data_size / 4);
@@ -197,7 +202,7 @@ void pcmBufferCallBack(SLAndroidSimpleBufferQueueItf bf, void *context) {
 
             audio->callJava->onCallVolumeDB(
                     CHILD_THREAD,
-                    audio->getPCMDB((char *) (audio->sampleBuffer), buffersize *4));
+                    audio->getPCMDB((char *) (audio->sampleBuffer), buffersize * 4));
             (*audio->pcmBufferQueue)->Enqueue(audio->pcmBufferQueue,
                                               (char *) audio->sampleBuffer,
                                               buffersize * 2 * 2);
