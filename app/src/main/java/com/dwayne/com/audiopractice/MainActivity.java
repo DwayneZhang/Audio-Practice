@@ -148,4 +148,17 @@ public class MainActivity extends AppCompatActivity {
     public void center(View view) {
         audioPlayer.setMute(MuteEnum.MUTE_CENTER);
     }
+
+    public void speed(View view) {
+        audioPlayer.setSpeed(1.5f);
+    }
+
+    public void pitch(View view) {
+        audioPlayer.setPitch(1.5f);
+    }
+
+    public void normal(View view) {
+        audioPlayer.setSpeed(1.0f);
+        audioPlayer.setPitch(1.0f);
+    }
 }

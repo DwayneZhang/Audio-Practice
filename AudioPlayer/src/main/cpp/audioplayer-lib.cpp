@@ -140,3 +140,21 @@ Java_com_dwayne_com_audioplayer_player_AudioPlayer_n_1mute(JNIEnv *env, jobject 
         ffmpeg->setMute(mute);
     }
 }
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_dwayne_com_audioplayer_player_AudioPlayer_n_1pitch(JNIEnv *env, jobject thiz,
+        jfloat pitch) {
+    if(ffmpeg != NULL) {
+        ffmpeg->setPitch(pitch);
+    }
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_dwayne_com_audioplayer_player_AudioPlayer_n_1speed(JNIEnv *env, jobject thiz,
+                                                            jfloat speed) {
+    if(ffmpeg != NULL) {
+        ffmpeg->setSpeed(speed);
+    }
+}

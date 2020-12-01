@@ -12,6 +12,9 @@
 #include <SLES/OpenSLES.h>
 #include <SLES/OpenSLES_Android.h>
 #include "SoundTouch.h"
+
+using namespace soundtouch;
+
 extern "C" {
 #include "libavcodec/avcodec.h"
 #include "libswresample/swresample.h"
@@ -42,6 +45,8 @@ public:
     double last_time = 0;
     int volumePercent = 100;
     int mute = 2;
+    float pitch = 1.0f;
+    float speed = 1.0f;
 
     // 引擎接口
     SLObjectItf engineObject = NULL;
@@ -61,13 +66,20 @@ public:
     //缓冲器队列接口
     SLAndroidSimpleBufferQueueItf pcmBufferQueue = NULL;
 
+    SoundTouch *soundTouch = NULL;
+    SAMPLETYPE *sampleBuffer = NULL;
+    bool  finished = true;
+    uint8_t *out_buffer = NULL;
+    int nb = 0;
+    int num = 0;
+
 public:
     Audio(PlayStatus *playStatus, int sample_rate, CallJava *callJava);
     ~Audio();
 
     void play();
 
-    int resampleAudio();
+    int resampleAudio(void **pcmbuf);
 
     void initOpenSLES();
 
@@ -84,6 +96,12 @@ public:
     void setVolume(int percent);
 
     void setMute(int mute);
+
+    int getSoundTouchData();
+
+    void setPitch(float pitch);
+
+    void setSpeed(float speed);
 };
 
 

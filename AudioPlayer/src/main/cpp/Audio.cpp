@@ -10,6 +10,13 @@ Audio::Audio(PlayStatus *playStatus, int sample_rate, CallJava *callJava) {
     this->callJava = callJava;
     queue = new Queue(playStatus);
     buffer = (uint8_t *) av_malloc(sample_rate * 2 * 2);
+
+    sampleBuffer = (SAMPLETYPE *) malloc(sample_rate * 2 * 2);
+    soundTouch = new SoundTouch();
+    soundTouch->setSampleRate(sample_rate);
+    soundTouch->setChannels(2);
+    soundTouch->setPitch(pitch); //音调
+    soundTouch->setTempo(speed); //音调
 }
 
 Audio::~Audio() {
@@ -26,7 +33,7 @@ void Audio::play() {
     pthread_create(&thread_play, NULL, decodPlay, this);
 }
 
-int Audio::resampleAudio() {
+int Audio::resampleAudio(void **pcmbuf) {
 
     while (playStatus != NULL && !playStatus->exit) {
         if (queue->getQueueSize() == 0) {
@@ -92,7 +99,7 @@ int Audio::resampleAudio() {
                 continue;
             }
 
-            int nb = swr_convert(
+            nb = swr_convert(
                     swr_ctx,
                     &buffer,
                     avFrame->nb_samples,
@@ -110,7 +117,7 @@ int Audio::resampleAudio() {
                 now_time = clock;
             }
             clock = now_time;
-
+            *pcmbuf = buffer;
             av_packet_free(&avPacket);
             av_free(avPacket);
             avPacket = NULL;
@@ -136,10 +143,47 @@ int Audio::resampleAudio() {
     return data_size;
 }
 
+int Audio::getSoundTouchData() {
+
+    while (playStatus != NULL && !playStatus->exit) {
+        out_buffer = NULL;
+        if (finished) {
+            finished = false;
+            data_size = resampleAudio((void **) &out_buffer);
+            if (data_size > 0) {
+                for (int i = 0; i < data_size / 2 + 1;
+                i++) {
+                    sampleBuffer[i] = (out_buffer[i * 2] |
+                                       ((out_buffer[i * 2 + 1])) << 8);
+                }
+                soundTouch->putSamples(sampleBuffer, nb);
+                num = soundTouch->receiveSamples(sampleBuffer, data_size / 4);
+            } else {
+                soundTouch->flush();
+            }
+        }
+        if (num == 0) {
+            finished = true;
+            continue;
+        } else {
+            if (out_buffer = NULL) {
+                num = soundTouch->receiveSamples(sampleBuffer, data_size / 4);
+                if (num == 0) {
+                    finished = true;
+                    continue;
+                }
+            }
+            return num;
+        }
+    }
+
+    return 0;
+}
+
 void pcmBufferCallBack(SLAndroidSimpleBufferQueueItf bf, void *context) {
     Audio *audio = (Audio *) context;
     if (audio != NULL) {
-        int buffersize = audio->resampleAudio();
+        int buffersize = audio->getSoundTouchData();
         if (buffersize > 0) {
             audio->clock += buffersize / (double) (audio->sample_rate * 2 * 2);
             if (audio->clock - audio->last_time >= 0.1) {
@@ -148,8 +192,8 @@ void pcmBufferCallBack(SLAndroidSimpleBufferQueueItf bf, void *context) {
                                                 audio->duration);
             }
             (*audio->pcmBufferQueue)->Enqueue(audio->pcmBufferQueue,
-                                              (char *) audio->buffer,
-                                              buffersize);
+                                              (char *) audio->sampleBuffer,
+                                              buffersize * 2 *2);
         }
     }
 }
@@ -210,6 +254,7 @@ void Audio::initOpenSLES() {
     //获取Volume接口
     (*pcmPlayerObject)->GetInterface(pcmPlayerObject, SL_IID_VOLUME, &pcmVolumePlay);
     setVolume(volumePercent);
+    setMute(mute);
 
     //获取声道接口
     (*pcmPlayerObject)->GetInterface(pcmPlayerObject, SL_IID_MUTESOLO, &pcmMutePlay);
@@ -367,7 +412,7 @@ void Audio::setMute(int mute) {
         if (mute == 0) { //left
             (*pcmMutePlay)->SetChannelMute(pcmMutePlay, 0, false);//0:左声道, 1:右声道
             (*pcmMutePlay)->SetChannelMute(pcmMutePlay, 1, true);
-        } else if(mute == 1) { //right
+        } else if (mute == 1) { //right
             (*pcmMutePlay)->SetChannelMute(pcmMutePlay, 0, true);
             (*pcmMutePlay)->SetChannelMute(pcmMutePlay, 1, false);
         } else if (mute == 2) { //center
@@ -377,3 +422,16 @@ void Audio::setMute(int mute) {
     }
 }
 
+void Audio::setPitch(float pitch) {
+    this->pitch = pitch;
+    if (soundTouch != NULL) {
+        soundTouch->setPitch(pitch);
+    }
+}
+
+void Audio::setSpeed(float speed) {
+    this->speed = speed;
+    if (soundTouch != NULL) {
+        soundTouch->setTempo(speed);
+    }
+}

@@ -40,6 +40,8 @@ public class AudioPlayer {
     private static int duration = -1;
     private static int volumePercent = 100;
     private static MuteEnum muteEnum = MuteEnum.MUTE_CENTER;
+    private static float pitch = 1.0f;
+    private static float speed = 1.0f;
     private OnPreparedListener onPreparedListener;
     private OnLoadListener onLoadListener;
     private OnPauseResumeListener onPauseResumeListener;
@@ -88,6 +90,23 @@ public class AudioPlayer {
         n_mute(mute.getValue());
     }
 
+    public void setVolume(int percent) {
+        if(percent >= 0 && percent <= 100) {
+            volumePercent = percent;
+            n_volume(percent);
+        }
+    }
+
+    public void setPitch(float p) {
+        pitch = p;
+        n_pitch(pitch);
+    }
+
+    public void setSpeed(float s) {
+        speed = s;
+        n_speed(speed);
+    }
+
     public void prepare() {
         if(TextUtils.isEmpty(source)) {
             LogUtil.d("source not be empty!");
@@ -105,6 +124,8 @@ public class AudioPlayer {
         new Thread(() -> {
             setVolume(volumePercent);
             setMute(muteEnum);
+            setPitch(pitch);
+            setSpeed(speed);
             n_start();
         }).start();
     }
@@ -172,13 +193,6 @@ public class AudioPlayer {
         }
     }
 
-    public void setVolume(int percent) {
-        if(percent >= 0 && percent <= 100) {
-            volumePercent = percent;
-            n_volume(percent);
-        }
-    }
-
     public void onCallError(int code, String msg) {
         stop();
         if(onErrorListener != null) {
@@ -209,5 +223,7 @@ public class AudioPlayer {
     private native int n_duration();
     private native void n_volume(int percent);
     private native void n_mute(int mute);
+    private native void n_pitch(float pitch);
+    private native void n_speed(float speed);
 
 }
