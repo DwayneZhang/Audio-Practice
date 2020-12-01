@@ -1,5 +1,7 @@
 package com.dwayne.com.audiopractice;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -9,6 +11,8 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import com.dwayne.com.audioplayer.MuteEnum;
 import com.dwayne.com.audioplayer.TimeInfoBean;
@@ -17,6 +21,8 @@ import com.dwayne.com.audioplayer.player.AudioPlayer;
 import com.dwayne.com.audioplayer.util.TimeUtil;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -25,6 +31,14 @@ public class MainActivity extends AppCompatActivity {
     private SeekBar seekBarSeek, seekBarVolume;
     private int position = 0;
     private boolean isSeekBar = false;
+    String[] permissions = new String[]{
+            Manifest.permission.INTERNET,
+            Manifest.permission.READ_PHONE_STATE,
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.VIBRATE,
+            Manifest.permission.RECORD_AUDIO,
+    };
     Handler handler = new Handler() {
         @Override
         public void handleMessage(@NonNull Message msg) {
@@ -111,6 +125,34 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+        checkPermissions();
+    }
+
+    private boolean checkPermissions() {
+        int result;
+        List<String> listPermissionsNeeded = new ArrayList<>();
+        for (String p : permissions) {
+            result = ContextCompat.checkSelfPermission(this, p);
+            if (result != PackageManager.PERMISSION_GRANTED) {
+                listPermissionsNeeded.add(p);
+            }
+        }
+        if (!listPermissionsNeeded.isEmpty()) {
+            ActivityCompat.requestPermissions(this, listPermissionsNeeded.toArray(new String[listPermissionsNeeded.size()]), 100);
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        if (requestCode == 100) {
+            if (grantResults.length > 0
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // do something
+            }
+            return;
+        }
     }
 
     public void begin(View view) {
