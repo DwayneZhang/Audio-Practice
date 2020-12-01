@@ -48,6 +48,8 @@ public:
     float pitch = 1.0f;
     float speed = 1.0f;
 
+    bool isRecordPCM = false;
+
     // 引擎接口
     SLObjectItf engineObject = NULL;
     SLEngineItf engineEngine = NULL;
@@ -104,6 +106,8 @@ public:
     void setSpeed(float speed);
 
     int getPCMDB(char *pcmadata, size_t pcmsize);
+
+    void recordPCM(bool record);
 };
 
 

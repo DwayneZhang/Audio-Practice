@@ -39,6 +39,7 @@ public class AudioPlayer {
     private static MuteEnum muteEnum = MuteEnum.MUTE_CENTER;
     private static float pitch = 1.0f;
     private static float speed = 1.0f;
+    private static boolean initMediaCodec = false;
     private static TimeInfoBean timeInfoBean;
 
     static {
@@ -148,6 +149,7 @@ public class AudioPlayer {
     public void stop() {
         timeInfoBean = null;
         duration = -1;
+        stopRecord();
         new Thread(() -> n_stop()).start();
     }
 
@@ -190,8 +192,31 @@ public class AudioPlayer {
         n_speed(speed);
     }
 
-    public void stardRecord(File outFile) {
-        initMediaCodec(n_samplerate(), outFile);
+    public void startRecord(File outFile) {
+        if(!initMediaCodec) {
+            initMediaCodec = true;
+            initMediaCodec(n_samplerate(), outFile);
+            n_record(true);
+        }
+    }
+
+    public void stopRecord() {
+        if(initMediaCodec) {
+            n_record(false);
+            releaseMedicacodec();
+        }
+    }
+
+    public void pauseRecord() {
+        if(initMediaCodec) {
+            n_record(false);
+        }
+    }
+
+    public void resumeRecord() {
+        if(initMediaCodec) {
+            n_record(true);
+        }
     }
 
     /**
@@ -271,6 +296,8 @@ public class AudioPlayer {
 
     private native int n_samplerate();
 
+    private native int n_record(boolean record);
+
     private void initMediaCodec(int samplerate, File outfile) {
 
         try {
@@ -328,8 +355,7 @@ public class AudioPlayer {
         }
     }
 
-    private void addADtsHeader(byte[] packet, int packetLen, int samplerate)
-    {
+    private void addADtsHeader(byte[] packet, int packetLen, int samplerate) {
         int profile = 2; // AAC LC
         int freqIdx = samplerate; // samplerate
         int chanCfg = 2; // CPE
@@ -343,11 +369,9 @@ public class AudioPlayer {
         packet[6] = (byte) 0xFC;
     }
 
-    private int getADTSsamplerate(int samplerate)
-    {
+    private int getADTSsamplerate(int samplerate) {
         int rate = 4;
-        switch (samplerate)
-        {
+        switch(samplerate) {
             case 96000:
                 rate = 0;
                 break;
@@ -391,10 +415,8 @@ public class AudioPlayer {
         return rate;
     }
 
-    private void releaseMedicacodec()
-    {
-        if(encoder == null)
-        {
+    private void releaseMedicacodec() {
+        if(encoder == null) {
             return;
         }
         try {
@@ -405,17 +427,15 @@ public class AudioPlayer {
             encoder = null;
             encoderFormat = null;
             bufferInfo = null;
-//            initmediacodec = false;
+            initMediaCodec = false;
 
-        } catch (IOException e) {
+        } catch(IOException e) {
             e.printStackTrace();
-        }
-        finally {
-            if(outputStream != null)
-            {
+        } finally {
+            if(outputStream != null) {
                 try {
                     outputStream.close();
-                } catch (IOException e) {
+                } catch(IOException e) {
                     e.printStackTrace();
                 }
                 outputStream = null;

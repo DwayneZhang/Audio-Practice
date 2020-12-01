@@ -197,8 +197,10 @@ void pcmBufferCallBack(SLAndroidSimpleBufferQueueItf bf, void *context) {
                                                 audio->duration);
             }
 
-//            audio->callJava->onCallPCMToAAC(CHILD_THREAD, buffersize * 2 * 2,
-//                                            audio->sampleBuffer);
+            if(audio->isRecordPCM) {
+                audio->callJava->onCallPCMToAAC(CHILD_THREAD, buffersize * 2 * 2,
+                                                audio->sampleBuffer);
+            }
 
             audio->callJava->onCallVolumeDB(
                     CHILD_THREAD,
@@ -461,4 +463,10 @@ int Audio::getPCMDB(char *pcmadata, size_t pcmsize) {
         db = (int) 20 * log10(sum);
     }
     return db;
+}
+
+void Audio::recordPCM(bool record) {
+
+    this->isRecordPCM = record;
+
 }

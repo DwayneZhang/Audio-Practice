@@ -209,6 +209,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void record(View view) {
-//        audioPlayer.stardRecord(new File("/sdcard/Download/player.aac"));
+        audioPlayer.startRecord(new File("/sdcard/Download/player.aac"));
+    }
+
+    public void stopRecord(View view) {
+        audioPlayer.stopRecord();
+    }
+
+    public void pauseRecord(View view) {
+        audioPlayer.pauseRecord();
+    }
+
+    public void resumeRecord(View view) {
+        audioPlayer.resumeRecord();
     }
 }

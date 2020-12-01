@@ -134,8 +134,29 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="录制"
+            android:text="开始录制"
             android:onClick="record"/>
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="停止录制"
+            android:onClick="stopRecord"/>
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="暂停录制"
+            android:onClick="pauseRecord"/>
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="继续录制"
+            android:onClick="resumeRecord"/>
     </LinearLayout>
 
 </LinearLayout>

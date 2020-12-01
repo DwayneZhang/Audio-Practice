@@ -55,6 +55,8 @@ public:
     void setSpeed(float speed);
 
     int getSamplerate();
+
+    void record(bool record);
 };
 
 

@@ -4,7 +4,7 @@
 #include "CallJava.h"
 #include "FFmpeg.h"
 
-extern "C"{
+extern "C" {
 #include "libavformat/avformat.h"
 }
 
@@ -21,7 +21,7 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved) {
     jint result = -1;
     javaVM = vm;
     JNIEnv *env;
-    if(vm->GetEnv((void **)(&env), JNI_VERSION_1_4) != JNI_OK) {
+    if (vm->GetEnv((void **) (&env), JNI_VERSION_1_4) != JNI_OK) {
         return result;
     }
     return JNI_VERSION_1_4;
@@ -29,12 +29,13 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved) {
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_dwayne_com_audioplayer_player_AudioPlayer_n_1prepare(JNIEnv *env, jobject thiz, jstring source) {
+Java_com_dwayne_com_audioplayer_player_AudioPlayer_n_1prepare(JNIEnv *env, jobject thiz,
+                                                              jstring source) {
 
     const char *url = env->GetStringUTFChars(source, 0);
 
-    if(ffmpeg == NULL) {
-        if(callJava == NULL) {
+    if (ffmpeg == NULL) {
+        if (callJava == NULL) {
             callJava = new CallJava(javaVM, env, &thiz);
         }
         callJava->onCallLoad(MAIN_THREAD, true);
@@ -46,7 +47,7 @@ Java_com_dwayne_com_audioplayer_player_AudioPlayer_n_1prepare(JNIEnv *env, jobje
 //    env->ReleaseStringUTFChars(source, url);
 }
 
-void *startCallback(void *data){
+void *startCallback(void *data) {
     FFmpeg *ffmpeg = (FFmpeg *) data;
     ffmpeg->start();
     pthread_exit(&thread_start);
@@ -55,15 +56,15 @@ void *startCallback(void *data){
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_dwayne_com_audioplayer_player_AudioPlayer_n_1start(JNIEnv *env, jobject thiz) {
-    if(ffmpeg != NULL) {
-        pthread_create(&thread_start, NULL, startCallback,ffmpeg);
+    if (ffmpeg != NULL) {
+        pthread_create(&thread_start, NULL, startCallback, ffmpeg);
     }
 }
 
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_dwayne_com_audioplayer_player_AudioPlayer_n_1pause(JNIEnv *env, jobject thiz) {
-    if(ffmpeg != NULL) {
+    if (ffmpeg != NULL) {
         ffmpeg->pause();
     }
 }
@@ -71,7 +72,7 @@ Java_com_dwayne_com_audioplayer_player_AudioPlayer_n_1pause(JNIEnv *env, jobject
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_dwayne_com_audioplayer_player_AudioPlayer_n_1resume(JNIEnv *env, jobject thiz) {
-    if(ffmpeg != NULL) {
+    if (ffmpeg != NULL) {
         ffmpeg->resume();
     }
 }
@@ -87,7 +88,7 @@ Java_com_dwayne_com_audioplayer_player_AudioPlayer_n_1stop(JNIEnv *env, jobject 
     jmethodID jmid_next = env->GetMethodID(jlz, "onCallNext", "()V");
 
     nexit = false;
-    if(ffmpeg != NULL) {
+    if (ffmpeg != NULL) {
         ffmpeg->release();
         delete (ffmpeg);
         ffmpeg = NULL;
@@ -108,7 +109,7 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_com_dwayne_com_audioplayer_player_AudioPlayer_n_1seek(JNIEnv *env, jobject thiz,
                                                            jint secds) {
-    if(ffmpeg != NULL) {
+    if (ffmpeg != NULL) {
         ffmpeg->seek(secds);
     }
 }
@@ -117,7 +118,7 @@ extern "C"
 JNIEXPORT jint JNICALL
 Java_com_dwayne_com_audioplayer_player_AudioPlayer_n_1duration(JNIEnv *env,
                                                                jobject thiz) {
-    if(ffmpeg != NULL) {
+    if (ffmpeg != NULL) {
         return ffmpeg->duration;
     }
     return 0;
@@ -127,7 +128,7 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_com_dwayne_com_audioplayer_player_AudioPlayer_n_1volume(JNIEnv *env, jobject thiz,
                                                              jint percent) {
-    if(ffmpeg != NULL) {
+    if (ffmpeg != NULL) {
         ffmpeg->setVolume(percent);
     }
 }
@@ -136,7 +137,7 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_com_dwayne_com_audioplayer_player_AudioPlayer_n_1mute(JNIEnv *env, jobject thiz,
                                                            jint mute) {
-    if(ffmpeg != NULL) {
+    if (ffmpeg != NULL) {
         ffmpeg->setMute(mute);
     }
 }
@@ -144,8 +145,8 @@ Java_com_dwayne_com_audioplayer_player_AudioPlayer_n_1mute(JNIEnv *env, jobject 
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_dwayne_com_audioplayer_player_AudioPlayer_n_1pitch(JNIEnv *env, jobject thiz,
-        jfloat pitch) {
-    if(ffmpeg != NULL) {
+                                                            jfloat pitch) {
+    if (ffmpeg != NULL) {
         ffmpeg->setPitch(pitch);
     }
 }
@@ -154,7 +155,7 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_com_dwayne_com_audioplayer_player_AudioPlayer_n_1speed(JNIEnv *env, jobject thiz,
                                                             jfloat speed) {
-    if(ffmpeg != NULL) {
+    if (ffmpeg != NULL) {
         ffmpeg->setSpeed(speed);
     }
 }
@@ -167,4 +168,13 @@ Java_com_dwayne_com_audioplayer_player_AudioPlayer_n_1samplerate(JNIEnv *env,
         return ffmpeg->getSamplerate();
     }
     return 0;
+}
+
+extern "C"
+JNIEXPORT jint JNICALL
+Java_com_dwayne_com_audioplayer_player_AudioPlayer_n_1record(JNIEnv *env,
+        jobject thiz, jboolean record) {
+    if (ffmpeg != NULL) {
+        ffmpeg->record(record);
+    }
 }

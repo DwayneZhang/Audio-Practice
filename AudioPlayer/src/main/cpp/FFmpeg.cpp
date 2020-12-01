@@ -294,3 +294,10 @@ int FFmpeg::getSamplerate() {
     }
     return 0;
 }
+
+void FFmpeg::record(bool record) {
+
+    if (audio != NULL) {
+        audio->recordPCM(record);
+    }
+}
