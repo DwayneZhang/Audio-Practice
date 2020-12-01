@@ -296,7 +296,7 @@ public class AudioPlayer {
 
     private native int n_samplerate();
 
-    private native int n_record(boolean record);
+    private native void n_record(boolean record);
 
     private void initMediaCodec(int samplerate, File outfile) {
 
@@ -307,7 +307,7 @@ public class AudioPlayer {
             encoderFormat.setInteger(MediaFormat.KEY_BIT_RATE, 96000);
             encoderFormat.setInteger(MediaFormat.KEY_AAC_PROFILE,
                     MediaCodecInfo.CodecProfileLevel.AACObjectLC);
-            encoderFormat.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, 4096);
+            encoderFormat.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, 5120);
             encoder = MediaCodec.createEncoderByType(MediaFormat.MIMETYPE_AUDIO_AAC);
             bufferInfo = new MediaCodec.BufferInfo();
             encoder.configure(encoderFormat, null, null,
@@ -324,6 +324,9 @@ public class AudioPlayer {
             int inputBufferIndex = encoder.dequeueInputBuffer(0);
             if(inputBufferIndex >= 0) {
                 ByteBuffer byteBuffer = encoder.getInputBuffer(inputBufferIndex);
+//                LogUtil.d("byteBuffer size:" + byteBuffer.capacity());
+//                LogUtil.d("size:" + size);
+//                LogUtil.d("buffer.length:" + buffer.length);
                 byteBuffer.clear();
                 byteBuffer.put(buffer);
                 encoder.queueInputBuffer(inputBufferIndex, 0,

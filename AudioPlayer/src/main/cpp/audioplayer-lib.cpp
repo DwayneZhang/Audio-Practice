@@ -171,7 +171,7 @@ Java_com_dwayne_com_audioplayer_player_AudioPlayer_n_1samplerate(JNIEnv *env,
 }
 
 extern "C"
-JNIEXPORT jint JNICALL
+JNIEXPORT void JNICALL
 Java_com_dwayne_com_audioplayer_player_AudioPlayer_n_1record(JNIEnv *env,
         jobject thiz, jboolean record) {
     if (ffmpeg != NULL) {
