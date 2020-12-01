@@ -38,6 +38,7 @@ int Audio::resampleAudio(void **pcmbuf) {
     while (playStatus != NULL && !playStatus->exit) {
 
         if (playStatus->seek) {
+            av_usleep(1000 * 100);
             continue;
         }
 
@@ -46,6 +47,7 @@ int Audio::resampleAudio(void **pcmbuf) {
                 playStatus->load = true;
                 callJava->onCallLoad(CHILD_THREAD, true);
             }
+            av_usleep(1000 * 100);
             continue;
         } else {
             if (playStatus->load) {
@@ -361,6 +363,8 @@ void Audio::release() {
         pcmPlayerObject = NULL;
         pcmPlayerPlay = NULL;
         pcmBufferQueue = NULL;
+        pcmMutePlay = NULL;
+        pcmVolumePlay = NULL;
     }
 
     if (outputMixObject != NULL) {
@@ -378,6 +382,20 @@ void Audio::release() {
     if (buffer != NULL) {
         free(buffer);
         buffer = NULL;
+    }
+
+    if(out_buffer != NULL) {
+        out_buffer = NULL;
+    }
+
+    if (soundTouch == NULL) {
+        delete soundTouch;
+        soundTouch = NULL;
+    }
+
+    if (sampleBuffer != NULL) {
+        free(sampleBuffer);
+        sampleBuffer = NULL;
     }
 
     if (avCodecContext != NULL) {

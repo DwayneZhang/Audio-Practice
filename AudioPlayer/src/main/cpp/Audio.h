@@ -11,6 +11,7 @@
 #include "CallJava.h"
 #include <SLES/OpenSLES.h>
 #include <SLES/OpenSLES_Android.h>
+#include <libavutil/time.h>
 #include "SoundTouch.h"
 
 using namespace soundtouch;
