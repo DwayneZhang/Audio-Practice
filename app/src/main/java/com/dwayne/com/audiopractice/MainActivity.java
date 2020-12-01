@@ -86,6 +86,8 @@ public class MainActivity extends AppCompatActivity {
 
 //        audioPlayer.setOnVolumeDBListener(db -> LogUtil.d(String.format("db is %d", db)));
 
+//        audioPlayer.setOnRecordTimeListener(time -> LogUtil.d(TimeUtil.secdsToDateFormat(time)));
+
         seekBarSeek.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress,

@@ -12,6 +12,7 @@ import com.dwayne.com.audioplayer.listener.OnErrorListener;
 import com.dwayne.com.audioplayer.listener.OnLoadListener;
 import com.dwayne.com.audioplayer.listener.OnPauseResumeListener;
 import com.dwayne.com.audioplayer.listener.OnPreparedListener;
+import com.dwayne.com.audioplayer.listener.OnRecordTimeListener;
 import com.dwayne.com.audioplayer.listener.OnTimeInfoListener;
 import com.dwayne.com.audioplayer.listener.OnVolumeDBListener;
 import com.dwayne.com.audioplayer.log.LogUtil;
@@ -61,6 +62,7 @@ public class AudioPlayer {
     private OnErrorListener onErrorListener;
     private OnCompleteListener onCompleteListener;
     private OnVolumeDBListener onVolumeDBListener;
+    private OnRecordTimeListener onRecordTimeListener;
     //mediacodec
     private MediaFormat encoderFormat = null;
     private MediaCodec encoder = null;
@@ -69,6 +71,8 @@ public class AudioPlayer {
     private int perPCMSize = 0;
     private byte[] outByteBuffer = null;
     private int aacSampleRate = 4;
+    private double recordTime = 0;
+    private int audioSampleRate = 0;
 
     public AudioPlayer() {
     }
@@ -103,6 +107,10 @@ public class AudioPlayer {
 
     public void setOnVolumeDBListener(OnVolumeDBListener onVolumeDBListener) {
         this.onVolumeDBListener = onVolumeDBListener;
+    }
+
+    public void setOnRecordTimeListener(OnRecordTimeListener onRecordTimeListener) {
+        this.onRecordTimeListener = onRecordTimeListener;
     }
 
     public int getVolumePercent() {
@@ -194,8 +202,9 @@ public class AudioPlayer {
 
     public void startRecord(File outFile) {
         if(!initMediaCodec) {
+            audioSampleRate = n_samplerate();
             initMediaCodec = true;
-            initMediaCodec(n_samplerate(), outFile);
+            initMediaCodec(audioSampleRate, outFile);
             n_record(true);
         }
     }
@@ -310,6 +319,7 @@ public class AudioPlayer {
             encoderFormat.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, 5120);
             encoder = MediaCodec.createEncoderByType(MediaFormat.MIMETYPE_AUDIO_AAC);
             bufferInfo = new MediaCodec.BufferInfo();
+            recordTime = 0;
             encoder.configure(encoderFormat, null, null,
                     MediaCodec.CONFIGURE_FLAG_ENCODE);
             outputStream = new FileOutputStream(outfile);
@@ -321,12 +331,13 @@ public class AudioPlayer {
 
     private void encodecPCMToAAC(int size, byte[] buffer) {
         if(buffer != null && encoder != null) {
+            recordTime += size * 1.0 / (audioSampleRate * 2 * 2);
+            if(onRecordTimeListener != null) {
+                onRecordTimeListener.onRecord((int) recordTime);
+            }
             int inputBufferIndex = encoder.dequeueInputBuffer(0);
             if(inputBufferIndex >= 0) {
                 ByteBuffer byteBuffer = encoder.getInputBuffer(inputBufferIndex);
-//                LogUtil.d("byteBuffer size:" + byteBuffer.capacity());
-//                LogUtil.d("size:" + size);
-//                LogUtil.d("buffer.length:" + buffer.length);
                 byteBuffer.clear();
                 byteBuffer.put(buffer);
                 encoder.queueInputBuffer(inputBufferIndex, 0,
@@ -423,6 +434,7 @@ public class AudioPlayer {
             return;
         }
         try {
+            recordTime = 0;
             outputStream.close();
             outputStream = null;
             encoder.stop();
