@@ -10,6 +10,7 @@ import com.dwayne.com.audioplayer.TimeInfoBean;
 import com.dwayne.com.audioplayer.listener.OnCompleteListener;
 import com.dwayne.com.audioplayer.listener.OnErrorListener;
 import com.dwayne.com.audioplayer.listener.OnLoadListener;
+import com.dwayne.com.audioplayer.listener.OnPCMInfoListener;
 import com.dwayne.com.audioplayer.listener.OnPauseResumeListener;
 import com.dwayne.com.audioplayer.listener.OnPreparedListener;
 import com.dwayne.com.audioplayer.listener.OnRecordTimeListener;
@@ -63,6 +64,7 @@ public class AudioPlayer {
     private OnCompleteListener onCompleteListener;
     private OnVolumeDBListener onVolumeDBListener;
     private OnRecordTimeListener onRecordTimeListener;
+    private OnPCMInfoListener onPCMInfoListener;
     //mediacodec
     private MediaFormat encoderFormat = null;
     private MediaCodec encoder = null;
@@ -111,6 +113,10 @@ public class AudioPlayer {
 
     public void setOnRecordTimeListener(OnRecordTimeListener onRecordTimeListener) {
         this.onRecordTimeListener = onRecordTimeListener;
+    }
+
+    public void setOnPCMInfoListener(OnPCMInfoListener onPCMInfoListener) {
+        this.onPCMInfoListener = onPCMInfoListener;
     }
 
     public int getVolumePercent() {
@@ -228,6 +234,14 @@ public class AudioPlayer {
         }
     }
 
+    public void cutAudioPlay(int start_time, int end_time, boolean showPCM) {
+        if(n_cutaudio(start_time, end_time, showPCM)) {
+            start();
+        } else {
+            stop();
+        }
+    }
+
     /**
      * 给jni层调用
      */
@@ -281,6 +295,18 @@ public class AudioPlayer {
         }
     }
 
+    public void onCallPCMInfo(byte[] buffer, int bufferSize) {
+        if(onPCMInfoListener != null) {
+            onPCMInfoListener.onPCMInfo(buffer, bufferSize);
+        }
+    }
+
+    public void onCallPCMRate(int sampleRate, int bit, int channels) {
+        if(onPCMInfoListener != null) {
+            onPCMInfoListener.onPCMRate(sampleRate, bit, channels);
+        }
+    }
+
     private native void n_prepare(String source);
 
     private native void n_start();
@@ -306,6 +332,8 @@ public class AudioPlayer {
     private native int n_samplerate();
 
     private native void n_record(boolean record);
+
+    private native boolean n_cutaudio(int start_time, int end_time, boolean showPCM);
 
     private void initMediaCodec(int samplerate, File outfile) {
 

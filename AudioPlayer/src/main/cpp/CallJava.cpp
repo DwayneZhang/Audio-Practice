@@ -24,6 +24,8 @@ CallJava::CallJava(JavaVM *vm, JNIEnv *env, jobject *obj) {
     jmid_complete = env->GetMethodID(jclz, "onCallComplete", "()V");
     jmid_volumedb = env->GetMethodID(jclz, "onCallVolumeDB", "(I)V");
     jmid_pcmtoaac = env->GetMethodID(jclz, "encodecPCMToAAC", "(I[B)V");
+    jmid_pcminfo = env->GetMethodID(jclz, "onCallPCMInfo", "([BI)V");
+    jmid_pcmrate = env->GetMethodID(jclz, "onCallPCMRate", "(III)V");
 }
 
 CallJava::~CallJava() {
@@ -151,3 +153,43 @@ void CallJava::onCallPCMToAAC(int threadType, int size, void *buffer) {
         javaVM->DetachCurrentThread();
     }
 }
+
+void CallJava::onCallPCMInfo(int threadType, void *buffer, int bufferSize) {
+    if (threadType == MAIN_THREAD) {
+        jbyteArray  jbuffer = jniEnv->NewByteArray(bufferSize);
+        jniEnv->SetByteArrayRegion(jbuffer, 0, bufferSize, (const jbyte *)(buffer));
+        jniEnv->CallVoidMethod(jobj, jmid_pcminfo, jbuffer, bufferSize);
+        jniEnv->DeleteLocalRef(jbuffer);
+    } else if (threadType == CHILD_THREAD) {
+        JNIEnv *jniEnv;
+        if (javaVM->AttachCurrentThread(&jniEnv, 0) != JNI_OK) {
+            if (LOG_DEBUG) {
+                LOGE("get child thread jnienv wrong");
+            }
+            return;
+        }
+        jbyteArray  jbuffer = jniEnv->NewByteArray(bufferSize);
+        jniEnv->SetByteArrayRegion(jbuffer, 0, bufferSize, (const jbyte *)(buffer));
+        jniEnv->CallVoidMethod(jobj, jmid_pcminfo, jbuffer, bufferSize);
+        jniEnv->DeleteLocalRef(jbuffer);
+        javaVM->DetachCurrentThread();
+    }
+}
+
+void CallJava::onCallPCMRate(int threadType, int sampleRate, int bit, int channels) {
+    if (threadType == MAIN_THREAD) {
+        jniEnv->CallVoidMethod(jobj, jmid_pcmrate, sampleRate, bit, channels);
+    } else if (threadType == CHILD_THREAD) {
+        JNIEnv *jniEnv;
+        if (javaVM->AttachCurrentThread(&jniEnv, 0) != JNI_OK) {
+            if (LOG_DEBUG) {
+                LOGE("get child thread jnienv wrong");
+            }
+            return;
+        }
+        jniEnv->CallVoidMethod(jobj, jmid_pcmrate, sampleRate, bit, channels);
+        javaVM->DetachCurrentThread();
+    }
+}
+
+

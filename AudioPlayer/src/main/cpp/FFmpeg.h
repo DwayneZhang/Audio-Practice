@@ -57,6 +57,8 @@ public:
     int getSamplerate();
 
     void record(bool record);
+
+    bool cutAudio(int start_time, int end_time, bool showPCM);
 };
 
 

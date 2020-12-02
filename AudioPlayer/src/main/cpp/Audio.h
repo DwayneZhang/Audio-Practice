@@ -77,6 +77,10 @@ public:
     int nb = 0;
     int num = 0;
 
+    bool isCut = false;
+    int end_time = 0;
+    bool showPCM = false;
+
 public:
     Audio(PlayStatus *playStatus, int sample_rate, CallJava *callJava);
     ~Audio();

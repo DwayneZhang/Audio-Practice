@@ -81,6 +81,7 @@ void FFmpeg::decodeFFmpegThread() {
                 audio->duration = pFormatCtx->duration / AV_TIME_BASE;
                 audio->time_base = pFormatCtx->streams[i]->time_base;
                 duration = audio->duration;
+                callJava->onCallPCMRate(CHILD_THREAD, audio->sample_rate, 16, 2);
             }
         }
     }
@@ -304,4 +305,17 @@ void FFmpeg::record(bool record) {
     if (audio != NULL) {
         audio->recordPCM(record);
     }
+}
+
+bool FFmpeg::cutAudio(int start_time, int end_time, bool showPCM) {
+
+    if (start_time >= 0 && end_time <= duration && start_time < end_time) {
+        audio->isCut = true;
+        audio->end_time = end_time;
+        audio->showPCM = showPCM;
+        seek(start_time);
+        return true;
+    }
+
+    return false;
 }

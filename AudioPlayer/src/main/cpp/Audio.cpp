@@ -8,6 +8,11 @@ Audio::Audio(PlayStatus *playStatus, int sample_rate, CallJava *callJava) {
     this->playStatus = playStatus;
     this->sample_rate = sample_rate;
     this->callJava = callJava;
+
+    this->isCut = false;
+    this->end_time = 0;
+    this->showPCM = false;
+
     queue = new Queue(playStatus);
     buffer = (uint8_t *) av_malloc(sample_rate * 2 * 2);
 
@@ -213,6 +218,15 @@ void pcmBufferCallBack(SLAndroidSimpleBufferQueueItf bf, void *context) {
             (*audio->pcmBufferQueue)->Enqueue(audio->pcmBufferQueue,
                                               (char *) audio->sampleBuffer,
                                               buffersize * 2 * 2);
+
+            if (audio->isCut) {
+                if (audio->showPCM) {
+                    audio->callJava->onCallPCMInfo(CHILD_THREAD, audio->sampleBuffer, buffersize * 2 *2);
+                }
+                if (audio->clock > audio->end_time) {
+                    audio->playStatus->exit = true;
+                }
+            }
         }
     }
 }

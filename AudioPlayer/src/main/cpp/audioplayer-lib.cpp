@@ -177,4 +177,14 @@ Java_com_dwayne_com_audioplayer_player_AudioPlayer_n_1record(JNIEnv *env,
     if (ffmpeg != NULL) {
         ffmpeg->record(record);
     }
+}extern "C"
+JNIEXPORT jboolean JNICALL
+Java_com_dwayne_com_audioplayer_player_AudioPlayer_n_1cutaudio(JNIEnv *env, jobject thiz,
+                                                               jint start_time,
+                                                               jint end_time,
+                                                               jboolean show_pcm) {
+    if (ffmpeg != NULL) {
+
+    }
+    return false;
 }

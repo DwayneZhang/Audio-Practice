@@ -16,6 +16,7 @@ import androidx.core.content.ContextCompat;
 
 import com.dwayne.com.audioplayer.MuteEnum;
 import com.dwayne.com.audioplayer.TimeInfoBean;
+import com.dwayne.com.audioplayer.listener.OnPCMInfoListener;
 import com.dwayne.com.audioplayer.log.LogUtil;
 import com.dwayne.com.audioplayer.player.AudioPlayer;
 import com.dwayne.com.audioplayer.util.TimeUtil;
@@ -88,6 +89,17 @@ public class MainActivity extends AppCompatActivity {
 
 //        audioPlayer.setOnRecordTimeListener(time -> LogUtil.d(TimeUtil.secdsToDateFormat(time)));
 
+//        audioPlayer.setOnPCMInfoListener(new OnPCMInfoListener() {
+//            @Override
+//            public void onPCMInfo(byte[] buffer, int bufferSize) {
+//
+//            }
+//
+//            @Override
+//            public void onPCMRate(int sampleRate, int bit, int channels) {
+//
+//            }
+//        });
         seekBarSeek.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress,

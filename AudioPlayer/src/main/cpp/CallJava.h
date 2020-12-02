@@ -27,6 +27,8 @@ public:
     jmethodID  jmid_complete;
     jmethodID  jmid_volumedb;
     jmethodID  jmid_pcmtoaac;
+    jmethodID  jmid_pcminfo;
+    jmethodID  jmid_pcmrate;
 
 public:
     CallJava(JavaVM *vm, JNIEnv *env, jobject *obj);
@@ -45,6 +47,10 @@ public:
     void onCallVolumeDB(int threadType, int db);
 
     void onCallPCMToAAC(int threadType, int size, void *buffer);
+
+    void onCallPCMInfo(int threadType, void *buffer, int bufferSize);
+
+    void onCallPCMRate(int threadType, int sampleRate, int bit, int channels);
 
 };
 
