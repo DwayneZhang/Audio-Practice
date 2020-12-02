@@ -15,6 +15,8 @@ add_library(audioplayer-lib SHARED
         src/main/cpp/Audio.cpp
         src/main/cpp/PlayStatus.cpp
         src/main/cpp/Queue.cpp
+        src/main/cpp/PCMBean.cpp
+        src/main/cpp/BufferQueue.cpp
         src/main/cpp/soundtouch/SoundTouch/AAFilter.cpp
         src/main/cpp/soundtouch/SoundTouch/FIFOSampleBuffer.cpp
         src/main/cpp/soundtouch/SoundTouch/FIRFilter.cpp

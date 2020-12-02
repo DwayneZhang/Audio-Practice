@@ -12,6 +12,8 @@
 #include <SLES/OpenSLES.h>
 #include <SLES/OpenSLES_Android.h>
 #include "SoundTouch.h"
+#include "BufferQueue.h"
+#include "PCMBean.h"
 
 using namespace soundtouch;
 
@@ -80,6 +82,10 @@ public:
     bool isCut = false;
     int end_time = 0;
     bool showPCM = false;
+
+    pthread_t pcmCallBackThread;
+    BufferQueue *bufferQueue;
+    int defaultPCMSize = 4096;
 
 public:
     Audio(PlayStatus *playStatus, int sample_rate, CallJava *callJava);

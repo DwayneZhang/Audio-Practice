@@ -34,8 +34,85 @@ void *decodPlay(void *data) {
     pthread_exit(&audio->thread_play);
 }
 
+void *pcmCallBack(void *data) {
+    Audio *audio = (Audio *) data;
+    audio->bufferQueue = new BufferQueue(audio->playStatus);
+    while (audio->playStatus != NULL && !audio->playStatus->exit) {
+        PCMBean *pcmBean = NULL;
+        audio->bufferQueue->getBuffer(&pcmBean);
+        if (pcmBean == NULL) {
+            continue;
+        }
+        if (pcmBean->buffsize <= audio->defaultPCMSize) {
+            if (audio->isRecordPCM) {
+                audio->callJava->onCallPCMToAAC(CHILD_THREAD, pcmBean->buffsize,
+                                                pcmBean->buffer);
+            }
+
+            if (audio->isCut) {
+                if (audio->showPCM) {
+                    audio->callJava->onCallPCMInfo(CHILD_THREAD, pcmBean->buffer,
+                                                   pcmBean->buffsize);
+                }
+                if (audio->clock > audio->end_time) {
+                    audio->playStatus->exit = true;
+                }
+            }
+        } else {
+            int pack_num = pcmBean->buffsize / audio->defaultPCMSize;
+            int pack_sub = pcmBean->buffsize % audio->defaultPCMSize;
+            for (int i = 0; i < pack_num; i++) {
+                char *bf = (char *) malloc(audio->defaultPCMSize);
+                memcpy(bf, pcmBean->buffer + i * audio->defaultPCMSize,
+                       audio->defaultPCMSize);
+
+                if (audio->isRecordPCM) {
+                    audio->callJava->onCallPCMToAAC(CHILD_THREAD, audio->defaultPCMSize,
+                                                    bf);
+                }
+
+                if (audio->isCut) {
+                    if (audio->showPCM) {
+                        audio->callJava->onCallPCMInfo(CHILD_THREAD, bf,
+                                                       audio->defaultPCMSize);
+                    }
+                    if (audio->clock > audio->end_time) {
+                        audio->playStatus->exit = true;
+                    }
+                }
+                free(bf);
+                bf = NULL;
+            }
+
+            if (pack_sub > 0) {
+                char *bf = (char *) malloc(pack_sub);
+                memcpy(bf, pcmBean->buffer + pack_num * audio->defaultPCMSize,
+                       pack_sub);
+                if (audio->isRecordPCM) {
+                    audio->callJava->onCallPCMToAAC(CHILD_THREAD, pack_sub,
+                                                    bf);
+                }
+
+                if (audio->isCut) {
+                    if (audio->showPCM) {
+                        audio->callJava->onCallPCMInfo(CHILD_THREAD, bf,
+                                                       pack_sub);
+                    }
+                    if (audio->clock > audio->end_time) {
+                        audio->playStatus->exit = true;
+                    }
+                }
+            }
+            delete (pcmBean);
+            pcmBean = NULL;
+        }
+    }
+    pthread_exit(&audio->pcmCallBackThread);
+}
+
 void Audio::play() {
     pthread_create(&thread_play, NULL, decodPlay, this);
+    pthread_create(&pcmCallBackThread, NULL, pcmCallBack, this);
 }
 
 int Audio::resampleAudio(void **pcmbuf) {
@@ -61,7 +138,7 @@ int Audio::resampleAudio(void **pcmbuf) {
             }
         }
 
-        if(readFrameFinished) {
+        if (readFrameFinished) {
             avPacket = av_packet_alloc();
             if (queue->getAvPacket(avPacket) != 0) {
                 av_packet_free(&avPacket);
@@ -207,10 +284,7 @@ void pcmBufferCallBack(SLAndroidSimpleBufferQueueItf bf, void *context) {
                                                 audio->duration);
             }
 
-            if(audio->isRecordPCM) {
-                audio->callJava->onCallPCMToAAC(CHILD_THREAD, buffersize * 2 * 2,
-                                                audio->sampleBuffer);
-            }
+            audio->bufferQueue->putBuffer(audio->sampleBuffer, buffersize * 2 * 2);
 
             audio->callJava->onCallVolumeDB(
                     CHILD_THREAD,
@@ -218,15 +292,6 @@ void pcmBufferCallBack(SLAndroidSimpleBufferQueueItf bf, void *context) {
             (*audio->pcmBufferQueue)->Enqueue(audio->pcmBufferQueue,
                                               (char *) audio->sampleBuffer,
                                               buffersize * 2 * 2);
-
-            if (audio->isCut) {
-                if (audio->showPCM) {
-                    audio->callJava->onCallPCMInfo(CHILD_THREAD, audio->sampleBuffer, buffersize * 2 *2);
-                }
-                if (audio->clock > audio->end_time) {
-                    audio->playStatus->exit = true;
-                }
-            }
         }
     }
 }
@@ -273,8 +338,10 @@ void Audio::initOpenSLES() {
     SLDataSource slDataSource = {&android_queue, &pcm};
 
 
-    const SLInterfaceID ids[4] = {SL_IID_BUFFERQUEUE, SL_IID_VOLUME, SL_IID_PLAYBACKRATE, SL_IID_MUTESOLO};
-    const SLboolean req[4] = {SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE};
+    const SLInterfaceID ids[4] = {SL_IID_BUFFERQUEUE, SL_IID_VOLUME, SL_IID_PLAYBACKRATE,
+                                  SL_IID_MUTESOLO};
+    const SLboolean req[4] = {SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE,
+                              SL_BOOLEAN_TRUE};
 
     (*engineEngine)->CreateAudioPlayer(engineEngine, &pcmPlayerObject, &slDataSource,
                                        &audioSnk, 4, ids, req);
@@ -370,6 +437,15 @@ void Audio::stop() {
 
 void Audio::release() {
     stop();
+
+    if (bufferQueue != NULL) {
+        bufferQueue->noticeThread();
+        pthread_join(pcmCallBackThread, NULL);
+        bufferQueue->release();
+        delete bufferQueue;
+        bufferQueue = NULL;
+    }
+
     if (queue != NULL) {
         delete queue;
         queue = NULL;
@@ -401,7 +477,7 @@ void Audio::release() {
         buffer = NULL;
     }
 
-    if(out_buffer != NULL) {
+    if (out_buffer != NULL) {
         out_buffer = NULL;
     }
 
