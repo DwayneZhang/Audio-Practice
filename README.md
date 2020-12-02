@@ -1,2 +1,2 @@
-### FFmpeg+OpenSL实现音频播放器
+### FFmpeg+OpenSL实现Android音频播放器
 
