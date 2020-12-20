@@ -184,6 +184,7 @@ void FFmpeg::start() {
                     break;
                 }
             }
+            break;
         }
     }
     if (callJava != NULL) {
